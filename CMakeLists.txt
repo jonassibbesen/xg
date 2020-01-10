@@ -67,30 +67,39 @@ include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 # for projects when we update their git tag.
 # The alternative is that we have to reconfigure/rebuild certain repos every single time.
 
-# libhandlegraph (full build using its cmake config)
-ExternalProject_Add(handlegraph
-  GIT_REPOSITORY "https://github.com/vgteam/libhandlegraph.git"
-  GIT_TAG "7b788bfaea21d976e372b130a2353deff99757f1"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR}
-  #BUILD_COMMAND ""
-  UPDATE_COMMAND ""
-  INSTALL_COMMAND "")
-ExternalProject_Get_property(handlegraph INSTALL_DIR)
-set(handlegraph_INCLUDE "${INSTALL_DIR}/src/handlegraph/src/include")
-set(handlegraph_LIB "${INSTALL_DIR}/src/handlegraph-build")
+if(${COMPILE_HANDLE} EQUAL 1)
 
-# sdsl-lite (full build using its cmake config)
-ExternalProject_Add(sdsl-lite
-  GIT_REPOSITORY "https://github.com/simongog/sdsl-lite.git"
-  GIT_TAG "ddb0fbbc33bb183baa616f17eb48e261ac2a3672"
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR} # TODO ADD static build flag
-  UPDATE_COMMAND ""
-  INSTALL_COMMAND "")
-ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
-set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
-set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
-set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
-set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
+  # libhandlegraph (full build using its cmake config)
+  ExternalProject_Add(handlegraph
+    GIT_REPOSITORY "https://github.com/vgteam/libhandlegraph.git"
+    GIT_TAG "7b788bfaea21d976e372b130a2353deff99757f1"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR}
+    #BUILD_COMMAND ""
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND "")
+  ExternalProject_Get_property(handlegraph INSTALL_DIR)
+  set(handlegraph_INCLUDE "${INSTALL_DIR}/src/handlegraph/src/include")
+  set(handlegraph_LIB "${INSTALL_DIR}/src/handlegraph-build")
+
+endif(${COMPILE_HANDLE} EQUAL 1)
+
+if(${COMPILE_SDSL} EQUAL 1)
+
+  # sdsl-lite (full build using its cmake config)
+  ExternalProject_Add(sdsl-lite
+    GIT_REPOSITORY "https://github.com/simongog/sdsl-lite.git"
+    GIT_TAG "ddb0fbbc33bb183baa616f17eb48e261ac2a3672"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR} # TODO ADD static build flag
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND "")
+  ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
+  set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
+  set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
+  set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
+  set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
+
+endif(${COMPILE_SDSL} EQUAL 1)
+
 
 # mmmultimap (memory mapped multimap)
 ExternalProject_Add(mmmultimap
@@ -139,8 +148,18 @@ set(ips4o_INCLUDE "${SOURCE_DIR}")
 
 add_library(xg_objs OBJECT src/xg.cpp)
 
-add_dependencies(xg_objs handlegraph)
-add_dependencies(xg_objs sdsl-lite)
+if(${COMPILE_HANDLE} EQUAL 1)
+
+  add_dependencies(xg_objs handlegraph)
+
+endif(${COMPILE_HANDLE} EQUAL 1)
+
+if(${COMPILE_SDSL} EQUAL 1)
+
+  add_dependencies(xg_objs sdsl-lite)
+
+endif(${COMPILE_SDSL} EQUAL 1)
+
 add_dependencies(xg_objs mmmultimap)
 add_dependencies(xg_objs tayweeargs)
 add_dependencies(xg_objs gfakluge)
