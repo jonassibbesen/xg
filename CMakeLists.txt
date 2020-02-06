@@ -67,33 +67,25 @@ include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 # for projects when we update their git tag.
 # The alternative is that we have to reconfigure/rebuild certain repos every single time.
 
-if(${COMPILE_HANDLE} EQUAL 1)
-
   # libhandlegraph (full build using its cmake config)
-  ExternalProject_Add(handlegraph
-    SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libhandlegraph"
-    CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>")
-  ExternalProject_Get_property(handlegraph INSTALL_DIR)
-  set(handlegraph_INCLUDE "${INSTALL_DIR}/include")
-  set(handlegraph_LIB "${INSTALL_DIR}/lib")
-
-endif(${COMPILE_HANDLE} EQUAL 1)
-
-if(${COMPILE_SDSL} EQUAL 1)
+#   ExternalProject_Add(handlegraph
+#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libhandlegraph"
+#     CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>")
+#   ExternalProject_Get_property(handlegraph INSTALL_DIR)
+#   set(handlegraph_INCLUDE "${INSTALL_DIR}/include")
+#   set(handlegraph_LIB "${INSTALL_DIR}/lib")
 
   # sdsl-lite (full build using its cmake config)
-  ExternalProject_Add(sdsl-lite
-    SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/sdsl-lite"
-    CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
-    UPDATE_COMMAND ""
-    INSTALL_COMMAND "")
-  ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
-  set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
-  set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
-  set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
-  set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
-
-endif(${COMPILE_SDSL} EQUAL 1)
+#   ExternalProject_Add(sdsl-lite
+#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/sdsl-lite"
+#     CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+#     UPDATE_COMMAND ""
+#     INSTALL_COMMAND "")
+#   ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
+#   set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
+#   set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
+#   set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
+#   set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
 
 # mmmultimap (memory mapped multimap)
 ExternalProject_Add(mmmultimap
@@ -178,38 +170,38 @@ add_library(libxg STATIC $<TARGET_OBJECTS:xg_objs>)
 set_target_properties(libxg PROPERTIES OUTPUT_NAME "xg")
 
 # set up our target executable and specify its dependencies and includes
-add_executable(xg
-  $<TARGET_OBJECTS:xg_objs>
-  ${CMAKE_SOURCE_DIR}/src/main.cpp
-  )
-target_include_directories(xg PUBLIC
-  "${CMAKE_SOURCE_DIR}/src"
-  "${handlegraph_INCLUDE}"
-  "${sdsl-lite_INCLUDE}"
-  "${sdsl-lite-divsufsort_INCLUDE}"
-  "${tayweeargs_INCLUDE}"
-  "${ips4o_INCLUDE}"
-  "${mmmultimap_INCLUDE}"
-  "${gfakluge_INCLUDE}"
-  "${gfakluge_tinyFA_INCLUDE}")
+# add_executable(xg
+#   $<TARGET_OBJECTS:xg_objs>
+#   ${CMAKE_SOURCE_DIR}/src/main.cpp
+#   )
+# target_include_directories(xg PUBLIC
+#   "${CMAKE_SOURCE_DIR}/src"
+#   "${handlegraph_INCLUDE}"
+#   "${sdsl-lite_INCLUDE}"
+#   "${sdsl-lite-divsufsort_INCLUDE}"
+#   "${tayweeargs_INCLUDE}"
+#   "${ips4o_INCLUDE}"
+#   "${mmmultimap_INCLUDE}"
+#   "${gfakluge_INCLUDE}"
+#   "${gfakluge_tinyFA_INCLUDE}")
 
 
 # macOS doesn't want you to link in libatomic this way
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(xg
-    "${sdsl-lite_LIB}/libsdsl.a"
-    "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
-    "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
-    "${handlegraph_LIB}/libhandlegraph.a"
-    )
-elseif (TRUE)
-  target_link_libraries(xg
-    "${sdsl-lite_LIB}/libsdsl.a"
-    "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
-    "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
-    "${handlegraph_LIB}/libhandlegraph.a"
-    "-latomic"
-    )
-  set(CMAKE_EXE_LINKER_FLAGS "-static")
-endif()
+# if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#   target_link_libraries(xg
+#     "${sdsl-lite_LIB}/libsdsl.a"
+#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
+#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
+#     "${handlegraph_LIB}/libhandlegraph.a"
+#     )
+# elseif (TRUE)
+#   target_link_libraries(xg
+#     "${sdsl-lite_LIB}/libsdsl.a"
+#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
+#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
+#     "${handlegraph_LIB}/libhandlegraph.a"
+#     "-latomic"
+#     )
+#   set(CMAKE_EXE_LINKER_FLAGS "-static")
+# endif()
 
