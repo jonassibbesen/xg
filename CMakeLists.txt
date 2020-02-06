@@ -67,7 +67,7 @@ include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 # for projects when we update their git tag.
 # The alternative is that we have to reconfigure/rebuild certain repos every single time.
 
-# Add option to not compile libhandlegraph, sdsl and main.cpp for use in rpvg
+# Add option to not compile libhandlegraph, sdsl and main.cpp when used as lib in rpvg
 if(NOT IS_RPVG_LIB)
     set(IS_RPVG_LIB 0)
 endif()
@@ -144,17 +144,12 @@ set(gfakluge_LIB "${INSTALL_DIR}/src/gfakluge")
 
 add_library(xg_objs OBJECT src/xg.cpp)
 
-if(${COMPILE_HANDLE} EQUAL 1)
+if(${IS_RPVG_LIB} EQUAL 0)
 
   add_dependencies(xg_objs handlegraph)
-
-endif(${COMPILE_HANDLE} EQUAL 1)
-
-if(${COMPILE_SDSL} EQUAL 1)
-
   add_dependencies(xg_objs sdsl-lite)
 
-endif(${COMPILE_SDSL} EQUAL 1)
+endif(${IS_RPVG_LIB} EQUAL 0)
 
 add_dependencies(xg_objs mmmultimap)
 add_dependencies(xg_objs tayweeargs)
