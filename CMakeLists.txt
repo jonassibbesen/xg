@@ -67,25 +67,38 @@ include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 # for projects when we update their git tag.
 # The alternative is that we have to reconfigure/rebuild certain repos every single time.
 
+# Add option to not compile libhandlegraph, sdsl and main.cpp for use in rpvg
+if(NOT IS_RPVG_LIB)
+    set(IS_RPVG_LIB 0)
+endif()
+
+if(${IS_RPVG_LIB} EQUAL 0)
+
   # libhandlegraph (full build using its cmake config)
-#   ExternalProject_Add(handlegraph
-#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libhandlegraph"
-#     CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>")
-#   ExternalProject_Get_property(handlegraph INSTALL_DIR)
-#   set(handlegraph_INCLUDE "${INSTALL_DIR}/include")
-#   set(handlegraph_LIB "${INSTALL_DIR}/lib")
+  ExternalProject_Add(handlegraph
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/libhandlegraph"
+    CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>")
+  ExternalProject_Get_property(handlegraph INSTALL_DIR)
+  set(handlegraph_INCLUDE "${INSTALL_DIR}/include")
+  set(handlegraph_LIB "${INSTALL_DIR}/lib")
+
+endif(${IS_RPVG_LIB} EQUAL 0)
+
+if(${IS_RPVG_LIB} EQUAL 0)
 
   # sdsl-lite (full build using its cmake config)
-#   ExternalProject_Add(sdsl-lite
-#     SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/sdsl-lite"
-#     CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
-#     UPDATE_COMMAND ""
-#     INSTALL_COMMAND "")
-#   ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
-#   set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
-#   set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
-#   set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
-#   set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
+  ExternalProject_Add(sdsl-lite
+    SOURCE_DIR "${CMAKE_SOURCE_DIR}/deps/sdsl-lite"
+    CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND "")
+  ExternalProject_Get_property(sdsl-lite INSTALL_DIR)
+  set(sdsl-lite_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/include")
+  set(sdsl-lite-divsufsort_INCLUDE "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/include")
+  set(sdsl-lite_LIB "${INSTALL_DIR}/src/sdsl-lite-build/lib")
+  set(sdsl-lite-divsufsort_LIB "${INSTALL_DIR}/src/sdsl-lite-build/external/libdivsufsort/lib")
+
+endif(${IS_RPVG_LIB} EQUAL 0)
 
 # mmmultimap (memory mapped multimap)
 ExternalProject_Add(mmmultimap
@@ -169,39 +182,41 @@ include_directories("${PROJECT_SOURCE_DIR}")
 add_library(libxg STATIC $<TARGET_OBJECTS:xg_objs>)
 set_target_properties(libxg PROPERTIES OUTPUT_NAME "xg")
 
-# set up our target executable and specify its dependencies and includes
-# add_executable(xg
-#   $<TARGET_OBJECTS:xg_objs>
-#   ${CMAKE_SOURCE_DIR}/src/main.cpp
-#   )
-# target_include_directories(xg PUBLIC
-#   "${CMAKE_SOURCE_DIR}/src"
-#   "${handlegraph_INCLUDE}"
-#   "${sdsl-lite_INCLUDE}"
-#   "${sdsl-lite-divsufsort_INCLUDE}"
-#   "${tayweeargs_INCLUDE}"
-#   "${ips4o_INCLUDE}"
-#   "${mmmultimap_INCLUDE}"
-#   "${gfakluge_INCLUDE}"
-#   "${gfakluge_tinyFA_INCLUDE}")
+if(${IS_RPVG_LIB} EQUAL 0)
 
+  # set up our target executable and specify its dependencies and includes
+  add_executable(xg
+    $<TARGET_OBJECTS:xg_objs>
+    ${CMAKE_SOURCE_DIR}/src/main.cpp
+    )
+  target_include_directories(xg PUBLIC
+    "${CMAKE_SOURCE_DIR}/src"
+    "${handlegraph_INCLUDE}"
+    "${sdsl-lite_INCLUDE}"
+    "${sdsl-lite-divsufsort_INCLUDE}"
+    "${tayweeargs_INCLUDE}"
+    "${ips4o_INCLUDE}"
+    "${mmmultimap_INCLUDE}"
+    "${gfakluge_INCLUDE}"
+    "${gfakluge_tinyFA_INCLUDE}")
 
-# macOS doesn't want you to link in libatomic this way
-# if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#   target_link_libraries(xg
-#     "${sdsl-lite_LIB}/libsdsl.a"
-#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
-#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
-#     "${handlegraph_LIB}/libhandlegraph.a"
-#     )
-# elseif (TRUE)
-#   target_link_libraries(xg
-#     "${sdsl-lite_LIB}/libsdsl.a"
-#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
-#     "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
-#     "${handlegraph_LIB}/libhandlegraph.a"
-#     "-latomic"
-#     )
-#   set(CMAKE_EXE_LINKER_FLAGS "-static")
-# endif()
+  # macOS doesn't want you to link in libatomic this way
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(xg
+      "${sdsl-lite_LIB}/libsdsl.a"
+      "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
+      "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
+      "${handlegraph_LIB}/libhandlegraph.a"
+      )
+  elseif (TRUE)
+    target_link_libraries(xg
+      "${sdsl-lite_LIB}/libsdsl.a"
+      "${sdsl-lite-divsufsort_LIB}/libdivsufsort.a"
+      "${sdsl-lite-divsufsort_LIB}/libdivsufsort64.a"
+      "${handlegraph_LIB}/libhandlegraph.a"
+      "-latomic"
+      )
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+  endif()
 
+endif(${IS_RPVG_LIB} EQUAL 0)
